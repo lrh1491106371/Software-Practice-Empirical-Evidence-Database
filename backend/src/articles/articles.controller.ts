@@ -91,5 +91,15 @@ export class ArticlesController {
   remove(@Param('id') id: string) {
     return this.articlesService.remove(id);
   }
+
+  @Post(':id/rate')
+  @UseGuards(JwtAuthGuard)
+  rate(
+    @Param('id') id: string,
+    @Body() body: { value: number },
+    @Request() req,
+  ) {
+    return this.articlesService.rateArticle(id, req.user.userId, Number(body?.value));
+  }
 }
 

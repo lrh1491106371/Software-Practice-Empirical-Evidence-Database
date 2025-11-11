@@ -5,6 +5,34 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import api from '@/lib/api';
 
+function parseBibtexSimple(text: string) {
+  const get = (re: RegExp) => {
+    const m = text.match(re);
+    return m ? m[1].trim().replace(/[{}]/g, '') : '';
+  };
+  const title = get(/title\s*=\s*[\{\"]([^\}^"]+)[\}\"]/i);
+  const authorsRaw = get(/author\s*=\s*[\{\"]([^\}^"]+)[\}\"]/i);
+  const year = get(/year\s*=\s*[\{\"]([^\}^"]+)[\}\"]/i);
+  const doi = get(/doi\s*=\s*[\{\"]([^\}^"]+)[\}\"]/i);
+  const journal = get(/journal\s*=\s*[\{\"]([^\}^"]+)[\}\"]/i);
+  const volume = get(/volume\s*=\s*[\{\"]([^\}^"]+)[\}\"]/i);
+  const pages = get(/pages\s*=\s*[\{\"]([^\}^"]+)[\}\"]/i);
+  const url = get(/url\s*=\s*[\{\"]([^\}^"]+)[\}\"]/i);
+
+  return {
+    title,
+    authors: authorsRaw
+      ? authorsRaw.split(/\s+and\s+/i).map((a) => a.replace(/\s+/g, ' ').trim())
+      : [],
+    publicationYear: parseInt(year || '') || new Date().getFullYear(),
+    doi,
+    journalName: journal,
+    volume,
+    pages,
+    url,
+  };
+}
+
 export default function SubmitPage() {
   const { isAuthenticated } = useAuth();
   const router = useRouter();
@@ -34,6 +62,28 @@ export default function SubmitPage() {
       ...formData,
       [name]: name === 'publicationYear' ? parseInt(value) || new Date().getFullYear() : value,
     });
+  };
+
+  const handleBibtex = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = parseBibtexSimple(text);
+      setFormData((prev) => ({
+        ...prev,
+        title: parsed.title || prev.title,
+        authors: parsed.authors.join(', '),
+        publicationYear: parsed.publicationYear || prev.publicationYear,
+        doi: parsed.doi || prev.doi,
+        journalName: parsed.journalName || prev.journalName,
+        volume: parsed.volume || prev.volume,
+        pages: parsed.pages || prev.pages,
+        url: parsed.url || prev.url,
+      }));
+    } catch (err) {
+      setError('Failed to parse BibTeX file.');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -89,6 +139,14 @@ export default function SubmitPage() {
         )}
 
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              BibTeX Upload
+            </label>
+            <input type="file" accept=".bib,.bibtex,text/plain" onChange={handleBibtex} />
+            <p className="mt-1 text-sm text-gray-500">Upload a .bib file to prefill fields</p>
+          </div>
+
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
               Title *

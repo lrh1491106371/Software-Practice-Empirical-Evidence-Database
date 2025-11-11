@@ -144,5 +144,30 @@ export class ArticlesService {
       .populate('submittedBy', 'firstName lastName email')
       .exec();
   }
+
+  async rateArticle(id: string, userId: string, value: number): Promise<ArticleDocument> {
+    if (value < 1 || value > 5) {
+      throw new ForbiddenException('Rating must be between 1 and 5');
+    }
+    const article = await this.articleModel.findById(id).exec();
+    if (!article) {
+      throw new NotFoundException(`Article with ID ${id} not found`);
+    }
+    const ratings = article.ratings || [];
+    const existingIndex = ratings.findIndex((r) => r.userId?.toString() === userId);
+    if (existingIndex >= 0) {
+      ratings[existingIndex].value = value as any;
+    } else {
+      ratings.push({ userId: userId as any, value });
+    }
+    const avg =
+      ratings.length > 0
+        ? ratings.reduce((sum, r) => sum + (r.value || 0), 0) / ratings.length
+        : 0;
+    article.ratings = ratings as any;
+    article.averageRating = Number(avg.toFixed(2));
+    await article.save();
+    return article;
+  }
 }
 

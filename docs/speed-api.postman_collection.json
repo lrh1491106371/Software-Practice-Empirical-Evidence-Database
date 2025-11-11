@@ -1,0 +1,261 @@
+{
+  "info": {
+    "name": "SPEED API",
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-1234567890ef",
+    "description": "Complete SPEED API Endpoints for Apifox",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "User Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth","register"]
+            }
+          }
+        },
+        {
+          "name": "User Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth","login"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Authorization", "value": "Bearer <JWT_TOKEN>"}
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/profile",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth","profile"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Articles",
+      "item": [
+        {
+          "name": "List All Articles",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/articles",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles"]
+            }
+          }
+        },
+        {
+          "name": "Get Article Details",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/articles/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles",":id"]
+            }
+          }
+        },
+        {
+          "name": "Submit New Article",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer <JWT_TOKEN>"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Article Title\",\n  \"authors\": [\"Author1\",\"Author2\"],\n  \"publicationYear\": 2025,\n  \"doi\": \"\",\n  \"journalName\": \"\",\n  \"volume\": \"\",\n  \"pages\": \"\",\n  \"abstract\": \"\",\n  \"url\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/articles",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles"]
+            }
+          }
+        },
+        {
+          "name": "Get My Submissions",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer <JWT_TOKEN>"}],
+            "url": {
+              "raw": "{{baseUrl}}/articles/my-submissions",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles","my-submissions"]
+            }
+          }
+        },
+        {
+          "name": "Approve Article",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer <JWT_TOKEN>"}],
+            "url": {
+              "raw": "{{baseUrl}}/articles/:id/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles",":id","approve"]
+            }
+          }
+        },
+        {
+          "name": "Reject Article",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer <JWT_TOKEN>"}],
+            "url": {
+              "raw": "{{baseUrl}}/articles/:id/reject",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles",":id","reject"]
+            }
+          }
+        },
+        {
+          "name": "Update Article",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {"key": "Authorization", "value": "Bearer <JWT_TOKEN>"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\",\n  \"abstract\": \"Updated abstract\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/articles/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles",":id"]
+            }
+          }
+        },
+        {
+          "name": "Delete Article",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer <JWT_TOKEN>"}],
+            "url": {
+              "raw": "{{baseUrl}}/articles/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["articles",":id"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Evidence",
+      "item": [
+        {
+          "name": "List All Evidence",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/evidence",
+              "host": ["{{baseUrl}}"],
+              "path": ["evidence"]
+            }
+          }
+        },
+        {
+          "name": "Create Evidence",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Authorization", "value": "Bearer <JWT_TOKEN>"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"articleId\": \"ARTICLE_ID\",\n  \"sePractice\": \"Practice Name\",\n  \"claim\": \"Claim Text\",\n  \"evidenceResult\": \"supports\",\n  \"researchType\": \"case study\",\n  \"participantType\": \"student\",\n  \"participantCount\": 10,\n  \"summary\": \"Evidence summary\",\n  \"notes\": \"Internal notes\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/evidence",
+              "host": ["{{baseUrl}}"],
+              "path": ["evidence"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "Search Articles by Title",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/search/articles?q=keyword",
+              "host": ["{{baseUrl}}"],
+              "path": ["search","articles"],
+              "query":[{"key":"q","value":"keyword"}]
+            }
+          }
+        },
+        {
+          "name": "Advanced Search",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/search/advanced",
+              "host": ["{{baseUrl}}"],
+              "path": ["search","advanced"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List All Users",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer <JWT_TOKEN>"}],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {"key": "baseUrl","value":"http://localhost:3000/api"}
+  ]
+}

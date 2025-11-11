@@ -30,6 +30,9 @@ export function Navbar() {
                   <Link href="/submit" className="text-gray-700 hover:text-primary-600">
                     Submit
                   </Link>
+                  <Link href="/my-submissions" className="text-gray-700 hover:text-primary-600">
+                    My Submissions
+                  </Link>
                   {hasRole('moderator') && (
                     <Link href="/moderate" className="text-gray-700 hover:text-primary-600">
                       Moderate

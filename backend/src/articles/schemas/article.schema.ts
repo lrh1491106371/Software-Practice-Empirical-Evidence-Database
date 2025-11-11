@@ -69,6 +69,21 @@ export class Article {
   // Bibtex raw data (optional)
   @Prop({ type: Object })
   bibtexData?: Record<string, any>;
+
+  // Ratings
+  @Prop({
+    type: [
+      {
+        userId: { type: Types.ObjectId, ref: 'User', required: true },
+        value: { type: Number, min: 1, max: 5, required: true },
+      },
+    ],
+    default: [],
+  })
+  ratings?: { userId: Types.ObjectId; value: number }[];
+
+  @Prop({ type: Number, default: 0 })
+  averageRating?: number;
 }
 
 export const ArticleSchema = SchemaFactory.createForClass(Article);

@@ -74,22 +74,22 @@ This document outlines the three-iteration development plan for the SPEED projec
 
 - ✅ Extended form with more fields
   - Journal name, volume, pages, abstract, URL
-- ✅ **Bibtex file upload** and parsing
+- ✅ **Bibtex file upload** and parsing (已实现前端上传与解析并预填表单)
 - ✅ Submitter can view their submissions and status
 - ✅ Submission feedback and success messages
 
 #### 3. Article Moderation Module (Complete)
 
-- ✅ Moderator dashboard with pending queue
-- ✅ Full article detail view
-- ✅ Approve/Reject functionality
+- ✅ Moderator dashboard with pending queue（已实现 `/moderate`）
+- ✅ Full article detail view（已实现 `/articles/:id`）
+- ✅ Approve/Reject functionality（已实现）
 - ✅ Basic duplicate checking (DOI/title)
 - ⏳ Email notifications (optional)
 
 #### 4. Article Analysis Module (Basic)
 
-- ✅ Analyst dashboard with pending queue
-- ✅ Evidence input interface
+- ✅ Analyst dashboard with pending queue（已实现 `/analyze`）
+- ✅ Evidence input interface（已实现弹窗录入）
   - SE Practice, Claim, Evidence Result
   - Research Type, Participant Type
 - ✅ Auto-fill article bibliographic info
@@ -100,10 +100,10 @@ This document outlines the three-iteration development plan for the SPEED projec
 - ✅ Search by predefined SE Practice
 - ✅ Search by Claims (related to SE Practice)
 - ✅ Filter by publication year range
-- ✅ Sortable results table
-- ✅ Article detail page with all data
-- ✅ User article rating (1-5 stars)
-- ✅ Display average ratings
+- ✅ Sortable results table（客户端排序已接入）
+- ✅ Article detail page with all data（已实现）
+- ✅ User article rating (1-5 stars)（已实现）
+- ✅ Display average ratings（搜索列表与详情页均展示）
 
 ### Deliverables
 
