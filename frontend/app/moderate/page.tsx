@@ -13,12 +13,21 @@ interface ArticleListItem {
   doi?: string;
 }
 
+interface ArticleDetail extends ArticleListItem {
+  journalName?: string;
+  volume?: string;
+  pages?: string;
+  abstract?: string;
+}
+
 export default function ModeratePage() {
   const { isAuthenticated, hasRole } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [articles, setArticles] = useState<ArticleListItem[]>([]);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
+  const [detail, setDetail] = useState<ArticleDetail | null>(null);
 
   const canAccess = isAuthenticated && (hasRole("moderator") || hasRole("admin"));
 
@@ -63,6 +72,17 @@ export default function ModeratePage() {
     }
   };
 
+  const openDetail = async (id: string) => {
+    setDetailId(id);
+    setDetail(null);
+    try {
+      const res = await api.get(`/articles/${id}`);
+      setDetail(res.data);
+    } catch (e: any) {
+      setError(e.response?.data?.message || "Load detail failed");
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -102,6 +122,10 @@ export default function ModeratePage() {
                 <h2 className="text-xl font-semibold mb-1">{a.title}</h2>
                 <p className="text-gray-600 mb-1"><strong>Authors:</strong> {a.authors.join(", ")}</p>
                 <p className="text-gray-600"><strong>Year:</strong> {a.publicationYear}{a.doi ? ` · DOI: ${a.doi}` : ""}</p>
+                {a.doi && (
+                  <p className="text-sm text-amber-700 mt-1">Duplicate hint: DOI present. Check existing records/search by DOI.</p>
+                )}
+                <button onClick={() => openDetail(a._id)} className="mt-2 text-primary-600 hover:underline">View details</button>
               </div>
               <div className="flex gap-2">
                 <button
@@ -121,6 +145,36 @@ export default function ModeratePage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {detailId && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center">
+          <div className="bg-white w-full max-w-3xl p-6 rounded-lg shadow-lg">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-xl font-semibold">Article Details</h3>
+              <button onClick={() => setDetailId(null)} className="text-gray-600">✕</button>
+            </div>
+            {!detail ? (
+              <p className="text-gray-600">Loading...</p>
+            ) : (
+              <div className="space-y-2">
+                <p><strong>Title:</strong> {detail.title}</p>
+                <p><strong>Authors:</strong> {detail.authors.join(", ")}</p>
+                <p><strong>Year:</strong> {detail.publicationYear}</p>
+                {detail.journalName && <p><strong>Journal:</strong> {detail.journalName}</p>}
+                {detail.volume && <p><strong>Volume:</strong> {detail.volume}</p>}
+                {detail.pages && <p><strong>Pages:</strong> {detail.pages}</p>}
+                {detail.doi && <p><strong>DOI:</strong> {detail.doi}</p>}
+                {detail.abstract && (
+                  <div>
+                    <p className="font-semibold">Abstract</p>
+                    <p className="text-gray-700 whitespace-pre-wrap">{detail.abstract}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

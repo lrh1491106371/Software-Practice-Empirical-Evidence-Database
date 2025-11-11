@@ -17,6 +17,11 @@ interface Article {
   pages?: string;
   abstract?: string;
   averageRating?: number;
+  status?: string;
+  reviewedBy?: any;
+  reviewedAt?: string;
+  analyzedBy?: any;
+  analyzedAt?: string;
 }
 
 interface Evidence {
@@ -37,7 +42,7 @@ export default function ArticleDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [article, setArticle] = useState<Article | null>(null);
-  const [evidence, setEvidence] = useState<Evidence | null>(null);
+  const [evidences, setEvidences] = useState<Evidence[]>([]);
   const [ratingSaving, setRatingSaving] = useState(false);
 
   useEffect(() => {
@@ -50,7 +55,7 @@ export default function ArticleDetailPage() {
           api.get(`/evidence/article/${id}`),
         ]);
         setArticle(a.data || null);
-        setEvidence(e.data || null);
+        setEvidences(e.data || []);
       } catch (e: any) {
         setError(e.response?.data?.message || "Failed to load article");
       } finally {
@@ -87,20 +92,35 @@ export default function ArticleDetailPage() {
         </div>
       </div>
       <div className="bg-white p-6 rounded-lg shadow mb-6">
-        <p className="text-gray-700 mb-1"><strong>Authors:</strong> {article.authors.join(", ")}</p>
-        <p className="text-gray-700 mb-1"><strong>Year:</strong> {article.publicationYear}</p>
-        {article.journalName && (
-          <p className="text-gray-700 mb-1"><strong>Journal:</strong> {article.journalName}</p>
-        )}
-        {article.volume && (
-          <p className="text-gray-700 mb-1"><strong>Volume:</strong> {article.volume}</p>
-        )}
-        {article.pages && (
-          <p className="text-gray-700 mb-1"><strong>Pages:</strong> {article.pages}</p>
-        )}
-        {article.doi && (
-          <p className="text-gray-700 mb-1"><strong>DOI:</strong> {article.doi}</p>
-        )}
+        <div className="grid md:grid-cols-2 gap-3">
+          <div>
+            <p className="text-gray-700 mb-1"><strong>Authors:</strong> {article.authors.join(", ")}</p>
+            <p className="text-gray-700 mb-1"><strong>Year:</strong> {article.publicationYear}</p>
+            {article.journalName && (
+              <p className="text-gray-700 mb-1"><strong>Journal:</strong> {article.journalName}</p>
+            )}
+            {article.volume && (
+              <p className="text-gray-700 mb-1"><strong>Volume:</strong> {article.volume}</p>
+            )}
+            {article.pages && (
+              <p className="text-gray-700 mb-1"><strong>Pages:</strong> {article.pages}</p>
+            )}
+            {article.doi && (
+              <p className="text-gray-700 mb-1"><strong>DOI:</strong> {article.doi}</p>
+            )}
+          </div>
+          <div>
+            {article.status && (
+              <p className="text-gray-700 mb-1"><strong>Status:</strong> {article.status.replace(/_/g, ' ')}</p>
+            )}
+            {article.reviewedAt && (
+              <p className="text-gray-700 mb-1"><strong>Reviewed:</strong> {new Date(article.reviewedAt).toLocaleString()}</p>
+            )}
+            {article.analyzedAt && (
+              <p className="text-gray-700 mb-1"><strong>Analyzed:</strong> {new Date(article.analyzedAt).toLocaleString()}</p>
+            )}
+          </div>
+        </div>
         {article.abstract && (
           <div className="mt-3">
             <p className="text-gray-900 font-semibold mb-1">Abstract</p>
@@ -110,24 +130,28 @@ export default function ArticleDetailPage() {
       </div>
 
       <h2 className="text-2xl font-semibold mb-3">Evidence</h2>
-      {!evidence ? (
+      {evidences.length === 0 ? (
         <p className="text-gray-600">No evidence available for this article.</p>
       ) : (
-        <div className="bg-white p-6 rounded-lg shadow">
-          <p className="text-gray-700 mb-1"><strong>SE Practice:</strong> {evidence.sePractice}</p>
-          <p className="text-gray-700 mb-1"><strong>Claim:</strong> {evidence.claim}</p>
-          <p className="text-gray-700 mb-1"><strong>Result:</strong> {evidence.evidenceResult}</p>
-          <p className="text-gray-700 mb-1"><strong>Research Type:</strong> {evidence.researchType}</p>
-          <p className="text-gray-700 mb-1"><strong>Participant Type:</strong> {evidence.participantType}</p>
-          {typeof evidence.participantCount === "number" && (
-            <p className="text-gray-700 mb-1"><strong>Participant Count:</strong> {evidence.participantCount}</p>
-          )}
-          {evidence.summary && (
-            <div className="mt-3">
-              <p className="text-gray-900 font-semibold mb-1">Summary</p>
-              <p className="text-gray-700">{evidence.summary}</p>
+        <div className="space-y-3">
+          {evidences.map((ev) => (
+            <div key={ev._id} className="bg-white p-4 rounded shadow">
+              <p className="text-gray-700 mb-1"><strong>SE Practice:</strong> {ev.sePractice}</p>
+              <p className="text-gray-700 mb-1"><strong>Claim:</strong> {ev.claim}</p>
+              <p className="text-gray-700 mb-1"><strong>Result:</strong> {ev.evidenceResult}</p>
+              <p className="text-gray-700 mb-1"><strong>Research Type:</strong> {ev.researchType}</p>
+              <p className="text-gray-700 mb-1"><strong>Participant Type:</strong> {ev.participantType}</p>
+              {typeof ev.participantCount === "number" && (
+                <p className="text-gray-700 mb-1"><strong>Participant Count:</strong> {ev.participantCount}</p>
+              )}
+              {ev.summary && (
+                <div className="mt-2">
+                  <p className="text-gray-900 font-semibold mb-1">Summary</p>
+                  <p className="text-gray-700">{ev.summary}</p>
+                </div>
+              )}
             </div>
-          )}
+          ))}
         </div>
       )}
     </div>

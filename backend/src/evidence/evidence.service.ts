@@ -68,9 +68,9 @@ export class EvidenceService {
     return evidence;
   }
 
-  async findByArticle(articleId: string): Promise<EvidenceDocument | null> {
+  async findByArticle(articleId: string): Promise<EvidenceDocument[]> {
     return this.evidenceModel
-      .findOne({ articleId })
+      .find({ articleId })
       .populate('articleId')
       .populate('analyzedBy', 'firstName lastName email')
       .exec();

@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import api from '@/lib/api';
 import { Article } from '@/types';
 import Link from 'next/link';
 import { StarRating } from '@/components/StarRating';
+import { SE_PRACTICES, PRACTICE_TO_CLAIMS } from '@/lib/constants';
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
@@ -18,13 +19,14 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const claimOptions = useMemo(() => (sePractice ? PRACTICE_TO_CLAIMS[sePractice] || [] : []), [sePractice]);
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      // If only title query is provided, use basic endpoint, else use advanced
       if (query && !sePractice && !yearFrom && !yearTo && !claim) {
         const response = await api.get('/search/articles', { params: { q: query } });
         setResults(sortArticles(response.data));
@@ -38,7 +40,6 @@ export default function SearchPage() {
             yearTo: yearTo || undefined,
           },
         });
-        // advanced returns evidence docs with populated article; normalize to articles
         const articles = (response.data || [])
           .map((e: any) => e.articleId)
           .filter(Boolean);
@@ -77,20 +78,27 @@ export default function SearchPage() {
             placeholder="Title contains..."
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           />
-          <input
-            type="text"
+          <select
             value={sePractice}
-            onChange={(e) => setSePractice(e.target.value)}
-            placeholder="SE Practice (e.g., TDD)"
+            onChange={(e) => { setSePractice(e.target.value); setClaim(''); }}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
-          <input
-            type="text"
+          >
+            <option value="">SE Practice (optional)</option>
+            {SE_PRACTICES.map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+          <select
             value={claim}
             onChange={(e) => setClaim(e.target.value)}
-            placeholder="Claim contains..."
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
+            disabled={!sePractice}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
+          >
+            <option value="">Claim (optional)</option>
+            {claimOptions.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
           <div className="grid grid-cols-2 gap-2">
             <input
               type="number"

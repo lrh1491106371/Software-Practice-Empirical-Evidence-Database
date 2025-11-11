@@ -48,8 +48,18 @@ export default function AnalyzePage() {
     fetchPending();
   }, [canAccess]);
 
+  const draftKey = (id: string) => `draft_evidence_${id}`;
+
   const openDialog = (id: string) => {
     setDialogFor(id);
+    const draft = typeof window !== 'undefined' ? localStorage.getItem(draftKey(id)) : null;
+    if (draft) {
+      try {
+        const parsed = JSON.parse(draft);
+        setForm(parsed);
+        return;
+      } catch {}
+    }
     setForm({
       sePractice: SE_PRACTICES[0] || "",
       claim: PRACTICE_TO_CLAIMS[SE_PRACTICES[0]]?.[0] || "",
@@ -62,8 +72,27 @@ export default function AnalyzePage() {
     });
   };
 
+  const updateForm = (patch: Partial<typeof form>) => {
+    const next = { ...form, ...patch };
+    setForm(next);
+    if (dialogFor && typeof window !== 'undefined') {
+      localStorage.setItem(draftKey(dialogFor), JSON.stringify(next));
+    }
+  };
+
+  const validate = () => {
+    if (!form.sePractice.trim()) return "SE Practice is required";
+    if (!form.claim.trim()) return "Claim is required";
+    return "";
+  };
+
   const submitEvidence = async () => {
     if (!dialogFor) return;
+    const v = validate();
+    if (v) {
+      setError(v);
+      return;
+    }
     try {
       setSaving(true);
       await api.post("/evidence", {
@@ -71,6 +100,7 @@ export default function AnalyzePage() {
         ...form,
       });
       setArticles((prev) => prev.filter((a) => a._id !== dialogFor));
+      if (typeof window !== 'undefined') localStorage.removeItem(draftKey(dialogFor));
       setDialogFor(null);
     } catch (e: any) {
       setError(e.response?.data?.message || "Save evidence failed");
@@ -78,8 +108,6 @@ export default function AnalyzePage() {
       setSaving(false);
     }
   };
-
-  const claims = form.sePractice ? PRACTICE_TO_CLAIMS[form.sePractice] || [] : [];
 
   if (!isAuthenticated) {
     return (
@@ -96,6 +124,8 @@ export default function AnalyzePage() {
       </div>
     );
   }
+
+  const claims = form.sePractice ? PRACTICE_TO_CLAIMS[form.sePractice] || [] : [];
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -143,7 +173,7 @@ export default function AnalyzePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">SE Practice</label>
                 <select
                   value={form.sePractice}
-                  onChange={(e) => setForm({ ...form, sePractice: e.target.value, claim: (PRACTICE_TO_CLAIMS[e.target.value] || [""])[0] || "" })}
+                  onChange={(e) => updateForm({ sePractice: e.target.value, claim: (PRACTICE_TO_CLAIMS[e.target.value] || [""])[0] || "" })}
                   className="w-full px-3 py-2 border rounded"
                 >
                   {SE_PRACTICES.map((p) => (
@@ -155,7 +185,7 @@ export default function AnalyzePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Claim</label>
                 <select
                   value={form.claim}
-                  onChange={(e) => setForm({ ...form, claim: e.target.value })}
+                  onChange={(e) => updateForm({ claim: e.target.value })}
                   className="w-full px-3 py-2 border rounded"
                 >
                   {claims.map((c) => (
@@ -167,7 +197,7 @@ export default function AnalyzePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Evidence Result</label>
                 <select
                   value={form.evidenceResult}
-                  onChange={(e) => setForm({ ...form, evidenceResult: e.target.value })}
+                  onChange={(e) => updateForm({ evidenceResult: e.target.value })}
                   className="w-full px-3 py-2 border rounded"
                 >
                   <option value="supports">supports</option>
@@ -179,7 +209,7 @@ export default function AnalyzePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Research Type</label>
                 <select
                   value={form.researchType}
-                  onChange={(e) => setForm({ ...form, researchType: e.target.value })}
+                  onChange={(e) => updateForm({ researchType: e.target.value })}
                   className="w-full px-3 py-2 border rounded"
                 >
                   <option value="case_study">case_study</option>
@@ -194,7 +224,7 @@ export default function AnalyzePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Participant Type</label>
                 <select
                   value={form.participantType}
-                  onChange={(e) => setForm({ ...form, participantType: e.target.value })}
+                  onChange={(e) => updateForm({ participantType: e.target.value })}
                   className="w-full px-3 py-2 border rounded"
                 >
                   <option value="students">students</option>
@@ -208,7 +238,7 @@ export default function AnalyzePage() {
                 <input
                   type="number"
                   value={form.participantCount}
-                  onChange={(e) => setForm({ ...form, participantCount: parseInt(e.target.value || "0", 10) })}
+                  onChange={(e) => updateForm({ participantCount: parseInt(e.target.value || "0", 10) })}
                   className="w-full px-3 py-2 border rounded"
                 />
               </div>
@@ -216,7 +246,7 @@ export default function AnalyzePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Summary</label>
                 <textarea
                   value={form.summary}
-                  onChange={(e) => setForm({ ...form, summary: e.target.value })}
+                  onChange={(e) => updateForm({ summary: e.target.value })}
                   rows={3}
                   className="w-full px-3 py-2 border rounded"
                 />
@@ -225,7 +255,7 @@ export default function AnalyzePage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                 <textarea
                   value={form.notes}
-                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                  onChange={(e) => updateForm({ notes: e.target.value })}
                   rows={3}
                   className="w-full px-3 py-2 border rounded"
                 />
