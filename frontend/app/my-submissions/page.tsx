@@ -67,6 +67,7 @@ export default function MySubmissionsPage() {
                 <th className="px-4 py-2">Authors</th>
                 <th className="px-4 py-2">Year</th>
                 <th className="px-4 py-2">Status</th>
+                <th className="px-4 py-2"></th>
               </tr>
             </thead>
             <tbody>
@@ -80,6 +81,11 @@ export default function MySubmissionsPage() {
                   <td className="px-4 py-2">{r.authors.join(", ")}</td>
                   <td className="px-4 py-2">{r.publicationYear}</td>
                   <td className="px-4 py-2 capitalize">{r.status.replace(/_/g, " ")}</td>
+                  <td className="px-4 py-2">
+                    {r.status === 'pending_review' && (
+                      <Link href={`/submit/${r._id}/edit`} className="text-primary-600 hover:underline">Edit</Link>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

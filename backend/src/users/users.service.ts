@@ -72,5 +72,9 @@ export class UsersService {
     if (!user) return false;
     return user.roles.includes(role) || user.roles.includes(UserRole.ADMIN);
   }
+
+  async findByResetToken(token: string): Promise<UserDocument | null> {
+    return this.userModel.findOne({ resetToken: token }).exec();
+  }
 }
 

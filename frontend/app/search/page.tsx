@@ -1,11 +1,19 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import api from '@/lib/api';
 import { Article } from '@/types';
 import Link from 'next/link';
 import { StarRating } from '@/components/StarRating';
 import { SE_PRACTICES, PRACTICE_TO_CLAIMS } from '@/lib/constants';
+
+const COLS = [
+  { key: 'authors', label: 'Authors' },
+  { key: 'publicationYear', label: 'Year' },
+  { key: 'journalName', label: 'Journal' },
+  { key: 'doi', label: 'DOI' },
+  { key: 'rating', label: 'Rating' },
+];
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
@@ -18,6 +26,23 @@ export default function SearchPage() {
   const [results, setResults] = useState<Article[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const [visibleCols, setVisibleCols] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    const saved = typeof window !== 'undefined' ? localStorage.getItem('search_visible_cols') : null;
+    if (saved) {
+      try { setVisibleCols(JSON.parse(saved)); } catch {}
+    } else {
+      setVisibleCols({ authors: true, publicationYear: true, journalName: true, doi: true, rating: true });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && Object.keys(visibleCols).length) {
+      localStorage.setItem('search_visible_cols', JSON.stringify(visibleCols));
+    }
+  }, [visibleCols]);
 
   const claimOptions = useMemo(() => (sePractice ? PRACTICE_TO_CLAIMS[sePractice] || [] : []), [sePractice]);
 
@@ -47,7 +72,6 @@ export default function SearchPage() {
       }
     } catch (err: any) {
       setError('Search failed. Please try again.');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -71,85 +95,47 @@ export default function SearchPage() {
 
       <form onSubmit={handleSearch} className="mb-6 bg-white p-4 rounded-lg shadow">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Title contains..."
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
-          <select
-            value={sePractice}
-            onChange={(e) => { setSePractice(e.target.value); setClaim(''); }}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          >
+          <input type="text" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Title contains..." className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+          <select value={sePractice} onChange={(e) => { setSePractice(e.target.value); setClaim(''); }} className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent">
             <option value="">SE Practice (optional)</option>
-            {SE_PRACTICES.map((p) => (
-              <option key={p} value={p}>{p}</option>
-            ))}
+            {SE_PRACTICES.map((p) => (<option key={p} value={p}>{p}</option>))}
           </select>
-          <select
-            value={claim}
-            onChange={(e) => setClaim(e.target.value)}
-            disabled={!sePractice}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100"
-          >
+          <select value={claim} onChange={(e) => setClaim(e.target.value)} disabled={!sePractice} className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100">
             <option value="">Claim (optional)</option>
-            {claimOptions.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
+            {claimOptions.map((c) => (<option key={c} value={c}>{c}</option>))}
           </select>
           <div className="grid grid-cols-2 gap-2">
-            <input
-              type="number"
-              value={yearFrom}
-              onChange={(e) => setYearFrom(e.target.value)}
-              placeholder="Year From"
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
-            <input
-              type="number"
-              value={yearTo}
-              onChange={(e) => setYearTo(e.target.value)}
-              placeholder="Year To"
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            />
+            <input type="number" value={yearFrom} onChange={(e) => setYearFrom(e.target.value)} placeholder="Year From" className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
+            <input type="number" value={yearTo} onChange={(e) => setYearTo(e.target.value)} placeholder="Year To" className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent" />
           </div>
         </div>
-        <div className="mt-4 flex gap-2 items-center">
-          <label className="text-sm text-gray-700">Sort by</label>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
-            className="px-3 py-2 border rounded"
-          >
-            <option value="publicationYear">Year</option>
-            <option value="title">Title</option>
-            <option value="journalName">Journal</option>
-          </select>
-          <select
-            value={sortDir}
-            onChange={(e) => setSortDir(e.target.value as any)}
-            className="px-3 py-2 border rounded"
-          >
-            <option value="desc">Desc</option>
-            <option value="asc">Asc</option>
-          </select>
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-primary-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50"
-          >
-            {loading ? 'Searching...' : 'Search'}
-          </button>
+        <div className="mt-4 flex flex-wrap gap-4 items-center">
+          <div className="flex gap-2 items-center">
+            <label className="text-sm text-gray-700">Sort by</label>
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as any)} className="px-3 py-2 border rounded">
+              <option value="publicationYear">Year</option>
+              <option value="title">Title</option>
+              <option value="journalName">Journal</option>
+            </select>
+            <select value={sortDir} onChange={(e) => setSortDir(e.target.value as any)} className="px-3 py-2 border rounded">
+              <option value="desc">Desc</option>
+              <option value="asc">Asc</option>
+            </select>
+          </div>
+          <div className="flex gap-3 items-center">
+            <span className="text-sm text-gray-700">Columns:</span>
+            {COLS.map((c) => (
+              <label key={c.key} className="text-sm inline-flex items-center gap-1">
+                <input type="checkbox" checked={visibleCols[c.key] ?? true} onChange={() => setVisibleCols((v) => ({ ...v, [c.key]: !(v[c.key] ?? true) }))} />
+                {c.label}
+              </label>
+            ))}
+          </div>
+          <button type="submit" disabled={loading} className="bg-primary-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary-700 disabled:opacity-50">{loading ? 'Searching...' : 'Search'}</button>
         </div>
       </form>
 
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
+      {error && (<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">{error}</div>)}
 
       {results.length > 0 ? (
         <div className="space-y-4">
@@ -158,30 +144,24 @@ export default function SearchPage() {
               <div className="flex items-start justify-between">
                 <div>
                   <h2 className="text-xl font-semibold mb-2">
-                    <Link href={`/articles/${article._id}`} className="text-primary-600 hover:underline">
-                      {article.title}
-                    </Link>
+                    <Link href={`/articles/${article._id}`} className="text-primary-600 hover:underline">{article.title}</Link>
                   </h2>
-                  <p className="text-gray-600 mb-1">
-                    <strong>Authors:</strong> {article.authors.join(', ')}
-                  </p>
-                  <p className="text-gray-600 mb-1">
-                    <strong>Year:</strong> {article.publicationYear}
-                  </p>
-                  {article.journalName && (
-                    <p className="text-gray-600 mb-1">
-                      <strong>Journal:</strong> {article.journalName}
-                    </p>
+                  {visibleCols.authors && (
+                    <p className="text-gray-600 mb-1"><strong>Authors:</strong> {article.authors.join(', ')}</p>
                   )}
-                  {article.doi && (
-                    <p className="text-gray-600 mb-1">
-                      <strong>DOI:</strong> {article.doi}
-                    </p>
+                  {visibleCols.publicationYear && (
+                    <p className="text-gray-600 mb-1"><strong>Year:</strong> {article.publicationYear}</p>
+                  )}
+                  {visibleCols.journalName && article.journalName && (
+                    <p className="text-gray-600 mb-1"><strong>Journal:</strong> {article.journalName}</p>
+                  )}
+                  {visibleCols.doi && article.doi && (
+                    <p className="text-gray-600 mb-1"><strong>DOI:</strong> {article.doi}</p>
                   )}
                 </div>
-                <div className="mt-1">
-                  <StarRating value={article.averageRating || 0} readOnly />
-                </div>
+                {visibleCols.rating && (
+                  <div className="mt-1"><StarRating value={article.averageRating || 0} readOnly /></div>
+                )}
               </div>
             </div>
           ))}

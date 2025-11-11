@@ -104,6 +104,8 @@ This document outlines the three-iteration development plan for the SPEED projec
 - ✅ Article detail page with all data（已实现）
 - ✅ User article rating (1-5 stars)（已实现）
 - ✅ Display average ratings（搜索列表与详情页均展示）
+- ✅ Predefined SE Practice dropdown + linked Claim dropdown（已实现）
+- ✅ Result columns customization with persistence（localStorage）
 
 ### Deliverables
 
@@ -129,13 +131,13 @@ This document outlines the three-iteration development plan for the SPEED projec
 
 #### 1. User Authentication & Authorization (Complete)
 
-- ⏳ Password reset functionality
+- ✅ Password reset functionality（已实现 request + reset）
 - ⏳ Granular permissions (e.g., submitter edits own pending articles)
 
 #### 2. Article Submission Module (Optimized)
 
 - ⏳ Improved feedback and error messages
-- ⏳ Allow submitters to edit pending submissions
+- ✅ Allow submitters to edit pending submissions（已实现 /submit/[id]/edit）
 
 #### 3. Article Analysis Module (Complete)
 
@@ -145,7 +147,7 @@ This document outlines the three-iteration development plan for the SPEED projec
 
 #### 4. Search & Results Display (Advanced)
 
-- ⏳ User-configurable result columns
+- ✅ User-configurable result columns（已实现）
 - ⏳ Save and manage custom queries
 - ⏳ ChatBot integration for query assistance (stretch goal)
 

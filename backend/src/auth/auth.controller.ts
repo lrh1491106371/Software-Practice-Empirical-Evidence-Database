@@ -23,5 +23,15 @@ export class AuthController {
   getProfile(@Request() req) {
     return req.user;
   }
+
+  @Post('request-reset')
+  async requestReset(@Body() body: { email: string }) {
+    return this.authService.requestPasswordReset(body.email);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() body: { token: string; password: string }) {
+    return this.authService.resetPassword(body.token, body.password);
+  }
 }
 

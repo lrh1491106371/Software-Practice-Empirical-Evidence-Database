@@ -4,6 +4,7 @@ import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -79,6 +80,32 @@ export class AuthService {
         roles: user.roles,
       },
     };
+  }
+
+  async requestPasswordReset(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      return { ok: true };
+    }
+    const token = randomBytes(24).toString('hex');
+    const expires = new Date(Date.now() + 1000 * 60 * 60);
+    (user as any).resetToken = token;
+    (user as any).resetExpires = expires;
+    await (user as any).save();
+    return { ok: true, token };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    const user = await this.usersService.findByResetToken(token);
+    if (!user || !(user as any).resetExpires || (user as any).resetExpires.getTime() < Date.now()) {
+      throw new UnauthorizedException('Invalid or expired reset token');
+    }
+    const hashed = await bcrypt.hash(newPassword, 10);
+    (user as any).password = hashed;
+    (user as any).resetToken = undefined;
+    (user as any).resetExpires = undefined;
+    await (user as any).save();
+    return { ok: true };
   }
 }
 
