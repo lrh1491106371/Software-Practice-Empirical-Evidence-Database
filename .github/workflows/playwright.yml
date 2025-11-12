@@ -18,12 +18,15 @@ jobs:
           node-version: 18
           
       - name: Install dependencies
-        run: npm install  # 修复：rpm → npm
+        working-directory: ./frontend
+        run: npm install
           
       - name: Install Playwright Browsers
+        working-directory: ./frontend
         run: npx playwright install --with-deps
           
       - name: Run Playwright tests
+        working-directory: ./frontend
         run: npx playwright test
           
       - name: Upload Playwright report
@@ -31,5 +34,5 @@ jobs:
         if: always()
         with:
           name: playwright-report
-          path: playwright-report/
+          path: frontend/playwright-report/
           retention-days: 30
