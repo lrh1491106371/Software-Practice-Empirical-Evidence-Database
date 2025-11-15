@@ -1,0 +1,15 @@
+{
+  "name": "software-practice-empirical-evidence-database",
+  "version": "1.0.0",
+  "description": "A web application for collecting, storing, and presenting empirical evidence on Software Engineering (SE) practices. Built with Next.js, Nest.js, MongoDB, and TypeScript.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
